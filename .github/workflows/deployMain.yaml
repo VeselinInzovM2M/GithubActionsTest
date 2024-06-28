@@ -65,27 +65,3 @@ jobs:
           docker build -t veselin2424/test_projects:testproject_latest -t veselin2424/test_projects:testproject_${{ env.VERSION }} -f TestProject/TestProject/Dockerfile .
           docker push veselin2424/test_projects:testproject_latest
           docker push veselin2424/test_projects:testproject_${{ env.VERSION }}
-          
-  deploy:
-    name: Deploy Container
-    runs-on: ubuntu-latest
-    needs: build_and_tag
-    steps:
-      - name: Install OpenSSH client
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y sshpass
-
-      - name: Deploy to server
-        env:
-          SERVER_IP: 10.10.12.20
-          SERVER_USER: m2mdev
-          SSH_PASSWORD: ${{ secrets.SSH_PASSWORD }}
-        run: |
-          sshpass -p "${{ secrets.SSH_PASSWORD }}" ssh ${SERVER_USER}@${SERVER_IP}
-            echo "ddddd" > "Desktop\test1file.txt"
-            docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" -p "${{ secrets.DOCKERHUB_TOKEN }}"
-            docker pull veselin2424/test_projects:testproject_latest
-            docker stop TestProject
-            docker rm TestProject
-            docker run -d --name TestProject veselin2424/test_projects:testproject_latest
