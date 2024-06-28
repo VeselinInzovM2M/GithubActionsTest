@@ -18,39 +18,48 @@ jobs:
         id: extract_version
         run: |
           $version = (Select-String -Path TestProject/TestProject/TestProject.csproj -Pattern '(?<=<Version>)[^<]+' -AllMatches).Matches[0].Value
-          echo "VERSION=$version" >> $env:GITHUB_ENV
+          if (-not [string]::IsNullOrEmpty($version)) {
+            echo "VERSION=$version" >> $env:GITHUB_ENV
+          } else {
+            Write-Error "Failed to extract version"
+            exit 1
 
       - name: Configure Git
+        if: env.VERSION
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
 
       - name: Check if tag exists and delete if present
-        if: ${{ env.VERSION }} != ''
+        if: env.VERSION
+        id: delete_tag
         run: |
-          if (git rev-parse "v${{ env.VERSION }}" -ne $null) {
+          $tagExists = git tag -l "v${{ env.VERSION }}"
+          if ($tagExists) {
             git tag -d "v${{ env.VERSION }}"
             git push --delete origin "v${{ env.VERSION }}"
             Write-Host "Deleted existing tag v${{ env.VERSION }}"
           }
 
       - name: Tag the commit
-        if: ${{ env.VERSION }} != ''
+        if: env.VERSION
         run: |
           git tag -a "v${{ env.VERSION }}" -m "Version ${{ env.VERSION }}"
-
+          
       - name: Force-push tags to origin
         if: ${{ env.VERSION }} != ''
         run: |
           git push origin --tags -f
 
       - name: DockerHub login
+        if: env.VERSION
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
           
       - name: Build and Push Docker Image
+        if: env.VERSION
         run: |
           docker build -t veselin2424/test_projects:testproject_latest -t veselin2424/test_projects:testproject_${{ env.VERSION }} -f TestProject/TestProject/Dockerfile .
           docker push veselin2424/test_projects:testproject_latest
