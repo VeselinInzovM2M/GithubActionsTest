@@ -23,6 +23,7 @@ jobs:
           } else {
             Write-Error "Failed to extract version"
             exit 1
+            }
 
       - name: Configure Git
         if: env.VERSION
