@@ -48,9 +48,9 @@ jobs:
           git tag -a "v${{ env.VERSION }}" -m "Version ${{ env.VERSION }}"
           
       - name: Force-push tags to origin
-        if: ${{ env.VERSION }} != ''
+        if: env.VERSION
         run: |
-          git push origin --tags -f
+          git push origin tag "v${{ env.VERSION }}"
 
       - name: DockerHub login
         if: env.VERSION
