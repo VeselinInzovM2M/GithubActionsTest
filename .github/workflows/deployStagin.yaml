@@ -1,0 +1,29 @@
+name: Docker Deploy Staging
+
+on:
+  push:
+    branches: [ "staging" ]
+
+jobs:
+  build:
+    name: Building image
+    runs-on: windows-2019
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: DockerHub login
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Extract version from Git
+        id: get_version
+        run: echo "version=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
+
+      - name: Build and push Docker image
+        run: |
+          docker build -t veselin2424/test_projects:testproject_latest -t veselin2424/test_projects:testproject_${{ env.version }} -f TestProject/TestProject/Dockerfile .
+          docker push veselin2424/test_projects:testproject_latest
+          docker push veselin2424/test_projects:testproject_${{ env.version }}
