@@ -6,7 +6,7 @@ on:
 
 jobs:
   build_and_tag:
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout Repository
@@ -17,13 +17,13 @@ jobs:
       - name: Extract version from .csproj
         id: extract_version
         run: |
-          $version = (Select-String -Path TestProject/TestProject/TestProject.csproj -Pattern '(?<=<Version>)[^<]+' -AllMatches).Matches[0].Value
-          if (-not [string]::IsNullOrEmpty($version)) {
-            echo "VERSION=$version" >> $env:GITHUB_ENV
-          } else {
-            Write-Error "Failed to extract version"
+          VERSION=$(grep -oPm1 "(?<=<Version>)[^<]+" TestProject/TestProject/TestProject.csproj)
+          if [ -n "$VERSION" ]; then
+            echo "VERSION=$VERSION" >> $GITHUB_ENV
+          else
+            echo "Failed to extract version"
             exit 1
-            }
+          fi
 
       - name: Configure Git
         if: env.VERSION
@@ -35,12 +35,11 @@ jobs:
         if: env.VERSION
         id: delete_tag
         run: |
-          $tagExists = git tag -l "v${{ env.VERSION }}"
-          if ($tagExists) {
+          if git rev-parse "v${{ env.VERSION }}" >/dev/null 2>&1; then
             git tag -d "v${{ env.VERSION }}"
             git push --delete origin "v${{ env.VERSION }}"
-            Write-Host "Deleted existing tag v${{ env.VERSION }}"
-          }
+            echo "Deleted existing tag v${{ env.VERSION }}"
+          fi
 
       - name: Tag the commit
         if: env.VERSION
@@ -50,19 +49,16 @@ jobs:
       - name: Force-push tags to origin
         if: env.VERSION
         run: |
-          git push origin tag "v${{ env.VERSION }}"
+          git push origin "v${{ env.VERSION }}"
 
-      - name: DockerHub login
+      - name: Docker login
         if: env.VERSION
-        uses: docker/login-action@v3
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
+        run: |
+          echo "${{ secrets.REGISTRY_PASSWORD }}" | docker login -u ${{ secrets.REGISTRY_USERNAME }} --password-stdin https://apiubu02.m2mservices.com
           
       - name: Build and Push Docker Image
         if: env.VERSION
         run: |
-          docker build -t veselin2424/test_projects:testproject_latest -t veselin2424/test_projects:testproject_${{ env.VERSION }} -f TestProject/TestProject/Dockerfile .
-          docker push veselin2424/test_projects:testproject_latest
-          docker push veselin2424/test_projects:testproject_${{ env.VERSION }}
-          
+          docker build -t apiubu02.m2mservices.com/test_projects:testproject_latest -t apiubu02.m2mservices.com/test_projects:testproject_${{ env.VERSION }} -f TestProject/TestProject/Dockerfile .
+          docker push apiubu02.m2mservices.com/test_projects:testproject_latest
+          docker push apiubu02.m2mservices.com/test_projects:testproject_${{ env.VERSION }}
