@@ -54,7 +54,7 @@ jobs:
       - name: Docker login
         if: env.VERSION
         run: |
-          echo "${{ secrets.REGISTRY_PASSWORD }}" | docker login -u ${{ secrets.REGISTRY_USERNAME }} --password-stdin https://apiubu02.m2mservices.com
+          echo ${{ secrets.REGISTRY_PASSWORD }} | docker login -u ${{ secrets.REGISTRY_USERNAME }} --password-stdin apiubu02.m2mservices.com
           
       - name: Build and Push Docker Image
         if: env.VERSION
