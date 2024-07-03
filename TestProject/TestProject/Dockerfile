@@ -6,7 +6,7 @@ EXPOSE 443
 FROM mcr.microsoft.com/dotnet/sdk:6.0-nanoserver-1809 AS build
 WORKDIR /src
 COPY ["TestProject/TestProject/TestProject.csproj", "TestProject/"]
-RUN dotnet restore "TestProject/TestProject.csproj"
+RUN dotnet restore "TestProject.csproj"
 COPY . .
 WORKDIR "/src/TestProject"
 RUN dotnet build "TestProject.csproj" -c Release -o /app/build
