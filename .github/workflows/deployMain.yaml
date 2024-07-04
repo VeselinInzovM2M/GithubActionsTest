@@ -5,7 +5,7 @@ on:
     branches: [ "main" ]
 
 jobs:
-  build_and_tag:
+  git_tag:
     runs-on: ubuntu-latest
 
     steps:
@@ -51,6 +51,11 @@ jobs:
         run: |
           git push origin "v${{ env.VERSION }}"
 
+
+  build_and_push:
+    runs-on: windows-2019
+    needs: git_tag
+    steps:
       - name: Docker login
         if: env.VERSION
         uses: docker/login-action@v3
@@ -58,10 +63,10 @@ jobs:
           registry: apiubu02.m2mservices.com
           username: ${{ secrets.REGISTRY_USERNAME }}
           password: ${{ secrets.REGISTRY_PASSWORD }}
-
+          
       - name: Build and Push Docker Image
         if: env.VERSION
         run: |
-          docker buildx ls
-          docker buildx create --use
-          docker buildx build --platform windows/amd64 -t apiubu02.m2mservices.com/test_projects:testproject_latest -t apiubu02.m2mservices.com/test_projects:testproject_${{ env.VERSION }} -f TestProject/TestProject/Dockerfile --push .
+          docker build -t apiubu02.m2mservices.com/test_projects:testproject_latest -t apiubu02.m2mservices.com/test_projects:testproject_${{ env.VERSION }} -f TestProject\TestProject\Dockerfile .
+          docker push apiubu02.m2mservices.com/test_projects:testproject_latest
+          docker push apiubu02.m2mservices.com/test_projects:testproject_${{ env.VERSION }}
