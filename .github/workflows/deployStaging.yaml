@@ -24,7 +24,7 @@ jobs:
         run: echo "version=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
 
       - name: Build and push Docker image
-        if: env.VERSION
+        if: env.version
         run: |
           docker build -t apiubu02.m2mservices.com/test_projects:staging_latest -t apiubu02.m2mservices.com/test_projects:staging_${{ env.version }} -f TestProject/TestProject/Dockerfile .
           docker push apiubu02.m2mservices.com/test_projects:staging_latest
