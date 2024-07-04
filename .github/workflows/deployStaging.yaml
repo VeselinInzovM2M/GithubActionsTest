@@ -26,6 +26,6 @@ jobs:
 
       - name: Build and push Docker image
         run: |
-          docker build -t veselin2424/test_projects:staging_latest -t veselin2424/test_projects:staging_${{ env.version }} -f TestProject/TestProject/Dockerfile .
-          docker push veselin2424/test_projects:staging_latest
-          docker push veselin2424/test_projects:staging_${{ env.version }}
+          docker build -t apiubu02.m2mservices.com/test_projects:staging_latest -t apiubu02.m2mservices.com/test_projects:staging_${{ env.version }} -f TestProject/TestProject/Dockerfile .
+          docker push apiubu02.m2mservices.com/test_projects:staging_latest
+          docker push apiubu02.m2mservices.com/test_projects:staging_${{ env.version }}
