@@ -6,7 +6,7 @@ EXPOSE 443
 FROM mcr.microsoft.com/dotnet/sdk:6.0-nanoserver-1809 AS build
 WORKDIR /src
 COPY ["TestProject/TestProject/TestProject.csproj", "TestProject/"]
-wmic UserAccount get ContainerUser
+WMIC UserAccount get ContainerUser
 RUN dotnet restore "./TestProject/TestProject.csproj"
 COPY . .
 WORKDIR "/src/TestProject"
