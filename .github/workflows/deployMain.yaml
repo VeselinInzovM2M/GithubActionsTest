@@ -6,7 +6,7 @@ on:
 
 jobs:
   build_and_tag:
-    runs-on: windows-2019
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout Repository
@@ -17,14 +17,13 @@ jobs:
       - name: Extract version from .csproj
         id: extract_version
         run: |
-          $version = Select-String -Path "TestProject\TestProject\TestProject.csproj" -Pattern "<Version>(.*?)</Version>" | ForEach-Object { $_.Matches.Groups[1].Value }
-          if ($version) {
-            echo "VERSION=$version" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
-          }
-          else {
-            Write-Error "Failed to extract version"
+          version=$(grep -oP '(?<=<Version>).*?(?=</Version>)' TestProject/TestProject/TestProject.csproj)
+          if [ -n "$version" ]; then
+            echo "VERSION=$version" >> $GITHUB_ENV
+          else
+            echo "Failed to extract version" >&2
             exit 1
-          }
+          fi
 
       - name: Configure Git
         if: env.VERSION
@@ -36,11 +35,11 @@ jobs:
         if: env.VERSION
         id: delete_tag
         run: |
-          if (git rev-parse "v${{ env.VERSION }}" -ErrorAction SilentlyContinue) {
+          if git rev-parse "v${{ env.VERSION }}" >/dev/null 2>&1; then
             git tag -d "v${{ env.VERSION }}"
             git push --delete origin "v${{ env.VERSION }}"
             echo "Deleted existing tag v${{ env.VERSION }}"
-          }
+          fi
 
       - name: Tag the commit
         if: env.VERSION
@@ -63,7 +62,5 @@ jobs:
       - name: Build and Push Docker Image
         if: env.VERSION
         run: |
-          docker build -t apiubu02.m2mservices.com/test_projects:testproject_latest -t apiubu02.m2mservices.com/test_projects:testproject_${{ env.VERSION }} -f TestProject\TestProject\Dockerfile .
-          docker push apiubu02.m2mservices.com/test_projects:testproject_latest
-          docker push apiubu02.m2mservices.com/test_projects:testproject_${{ env.VERSION }}
-          
+          docker buildx create --use
+          docker buildx build --platform windows/amd64 -t apiubu02.m2mservices.com/test_projects:testproject_latest -t apiubu02.m2mservices.com/test_projects:testproject_${{ env.VERSION }} -f TestProject/TestProject/Dockerfile --push .
