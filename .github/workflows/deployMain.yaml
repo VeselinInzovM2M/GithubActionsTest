@@ -62,5 +62,6 @@ jobs:
       - name: Build and Push Docker Image
         if: env.VERSION
         run: |
-          docker buildx create --use
-          docker buildx build --platform linux/amd64 -t apiubu02.m2mservices.com/test_projects:testproject_latest -t apiubu02.m2mservices.com/test_projects:testproject_${{ env.VERSION }} -f TestProject/TestProject/Dockerfile --push .
+          docker build -t apiubu02.m2mservices.com/test_projects:main_latest -t apiubu02.m2mservices.com/test_projects:main_${{ env.version }} -f TestProject/TestProject/Dockerfile .
+          docker push apiubu02.m2mservices.com/test_projects:main_latest
+          docker push apiubu02.m2mservices.com/test_projects:main_${{ env.version }}
