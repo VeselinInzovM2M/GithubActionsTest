@@ -17,11 +17,11 @@ jobs:
       - name: Extract version from .csproj
         id: extract_version
         run: |
-          version=$(grep -oPm1 "(?<=<Version>)[^<]+" TestProject\TestProject\TestProject.csproj)
+          version=$(grep -oP '(?<=<Version>).*?(?=</Version>)' TestProject/TestProject/TestProject.csproj)
           if [ -n "$version" ]; then
             echo "VERSION=$version" >> $GITHUB_ENV
           else
-            echo "Failed to extract version"
+            echo "Failed to extract version" >&2
             exit 1
           fi
 
@@ -49,7 +49,7 @@ jobs:
       - name: Force-push tags to origin
         if: env.VERSION
         run: |
-          git push origin tag "v${{ env.VERSION }}"
+          git push origin "v${{ env.VERSION }}"
 
       - name: Docker login
         if: env.VERSION
@@ -59,10 +59,8 @@ jobs:
           username: ${{ secrets.REGISTRY_USERNAME }}
           password: ${{ secrets.REGISTRY_PASSWORD }}
 
-      - name: Build and push Docker image
+      - name: Build and Push Docker Image
         if: env.VERSION
         run: |
-          docker build -t apiubu02.m2mservices.com/test_projects:main_latest -t apiubu02.m2mservices.com/test_projects:main_${{ env.VERSION }} -f TestProject\TestProject\Dockerfile .
-          docker push apiubu02.m2mservices.com/test_projects:main_latest
-          docker push apiubu02.m2mservices.com/test_projects:main_${{ env.VERSION }}
-
+          docker buildx create --use
+          docker buildx build --platform linux/amd64 -t apiubu02.m2mservices.com/test_projects:testproject_latest -t apiubu02.m2mservices.com/test_projects:testproject_${{ env.VERSION }} -f TestProject/TestProject/Dockerfile --push .
