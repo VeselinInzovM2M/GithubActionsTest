@@ -25,6 +25,6 @@ jobs:
     - name: Run server commands
       run: ssh -vvv  staging -p 43389 << 'EOF'
             sudo /root/run pull m2mtunnelrelay
-            sleep 10
+            sleep 3
             sudo /root/run up -d m2mtunnelrelay
           EOF
