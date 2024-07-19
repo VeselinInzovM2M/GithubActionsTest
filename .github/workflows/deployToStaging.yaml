@@ -23,4 +23,4 @@ jobs:
         SSH_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
         
     - name: Run server commands
-      run: ssh -vvv staging -p 43389 'echo "devQq12345678" | sudo -S sleep 1 && sudo su; cd; ./run pull m2mtunnelrelay; ./run up -d m2mtunnelrelay'
+      run: ssh -vvv staging -p 43389 'cd; ls; ./run pull m2mtunnelrelay; ./run up -d m2mtunnelrelay'
