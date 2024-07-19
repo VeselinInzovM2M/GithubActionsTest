@@ -24,7 +24,7 @@ jobs:
         
     - name: Run server commands
       run: ssh -vvv staging -p 43389 << 'EOF'
-          echo "devQq12345678" | sudo -S su
+          sudo -s
           cd
           ./run pull m2mtunnelrelay
           ./run up -d m2mtunnelrelay
