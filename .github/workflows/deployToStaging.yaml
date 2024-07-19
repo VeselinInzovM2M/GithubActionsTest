@@ -23,4 +23,12 @@ jobs:
         SSH_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
         
     - name: Run server commands
-      run: ssh -vvv staging -p 43389 'cd; ls; ./run pull m2mtunnelrelay; ./run up -d m2mtunnelrelay'
+      run: ssh -vvv -o StrictHostKeyChecking=no staging -p 43389 << 'EOF'
+            echo "${{ secrets.SUDO_PASSWORD }}" | sudo -S bash -c '
+            cd
+            sleep 10
+            ./run pull m2mtunnelrelay
+            sleep 10
+            ./run up -d m2mtunnelrelay
+            '
+          EOF
