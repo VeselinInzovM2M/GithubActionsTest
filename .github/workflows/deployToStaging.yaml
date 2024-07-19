@@ -27,5 +27,4 @@ jobs:
             sudo /root/run pull m2mtunnelrelay
             sleep 10
             sudo /root/run up -d m2mtunnelrelay
-            '
           EOF
