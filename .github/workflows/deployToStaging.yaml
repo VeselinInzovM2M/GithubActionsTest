@@ -13,8 +13,7 @@ jobs:
         chmod 600 ~/.ssh/staging.key
         cat >>~/.ssh/config <<END
         Host staging
-          HostName 10.10.12.200
-          Port 43389
+          HostName 172.16.32.203
           User dev
           IdentityFile ~/.ssh/staging.key
           StrictHostKeyChecking no
@@ -23,4 +22,4 @@ jobs:
         SSH_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
         
     - name: Run server commands
-      run: ssh staging -p 43389 'echo "testing" > testfile1276'
+      run: ssh staging 'echo "testing" > testfile1276'
