@@ -15,7 +15,7 @@ jobs:
         Host staging
           HostName 185.201.80.253
           Port 43389
-          User dev
+          User githubRunner
           IdentityFile ~/.ssh/staging.key
           StrictHostKeyChecking no
         END
