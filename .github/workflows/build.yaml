@@ -2,6 +2,8 @@ name: Build
 
 on:
   pull_request:
+    paths:
+      - 'TestFolder/**'
   workflow_dispatch:
     
 jobs:
